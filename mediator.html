@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style type="text/css">
+      body {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+      div {
+        height: 50px;
+      }
+    </style>
+  </head>
+  <body>
+    <div>Let's play a game. You have 30 sec.</div>
+    <div id="score-board">
+      <div class="home-player"></div>
+      <div class="guest-player"></div>
+    </div>
+    <script>
+      function Player(name) {
+        this.points = 0;
+        this.name = name;
+      }
+      Player.prototype.play = function () {
+        this.points += 1;
+        mediator.played();
+      };
+      function ScoreBoard() {
+        this.board = document.getElementById("score-board");
+        this.homePlayer = this.board.querySelector(".home-player");
+        this.guestPlayer = this.board.querySelector(".guest-player");
+
+        this.update = function (score) {
+          this.homePlayer.innerText = score.homePlayer;
+          this.guestPlayer.innerText = score.guestPlayer;
+        };
+      }
+
+      function Mediator(PlayerConstructor, ScoreBoardConstructor) {
+        this.players = {};
+        this.scoreBoard = new ScoreBoardConstructor();
+        this.setup = function () {
+          const { players } = this;
+          players.homePlayer = new PlayerConstructor("Home");
+          players.guestPlayer = new PlayerConstructor("Guest");
+        };
+        this.played = function () {
+          const { players } = this;
+          const score = {
+            homePlayer: this.players.homePlayer.points,
+            guestPlayer: this.players.guestPlayer.points,
+          };
+          this.scoreBoard.update(score);
+        };
+        this.keypressFunc = function (e) {
+          if (e.which === 49) {
+            this.players.homePlayer.play();
+            return;
+          }
+          if (e.which === 48) {
+            this.players.guestPlayer.play();
+            return;
+          }
+        };
+        this.keypress = this.keypressFunc.bind(this);
+      }
+      const mediator = new Mediator(Player, ScoreBoard);
+      mediator.setup();
+
+      window.onkeypress = mediator.keypress;
+      setTimeout(function () {
+        window.onkeypress = null;
+        alert("Game over!");
+      }, 30000);
+    </script>
+  </body>
+</html>
